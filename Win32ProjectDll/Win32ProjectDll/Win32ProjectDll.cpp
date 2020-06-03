@@ -89,11 +89,31 @@ extern "C" __declspec(dllexport) void TakesAnArray(int len, int a[])
 extern "C" __declspec(dllexport) void UnsignedArray(int len,unsigned char a[])
 {
 	printf_s("UnsignedArray called\n");
-	for (int i = 0; i < len; i++)
-	{
-		printf("%d = %d\n", i, a[i]);
-	}
+	a[0] = 49;
+	a[1] = 46;
+	a[2] = 49;
+	a[3] = 46;
+	a[4] = 49;
+	a[5] = 46;
+	a[6] = 49;
 
+
+	//for (int i = 0; i < len; i++)
+	//{
+	//	a[i] = 49;
+	//	printf("Change %d to %d\n", i, a[i]);
+	//}
+}
+
+//使用 PInvoke 封送数组，使用memcpy
+extern "C" __declspec(dllexport) void MemcpyArray(int len, unsigned char a[])
+{
+	unsigned char version[] = "1.1.1.1";
+	if (len > 12)
+	{
+		len = 12;
+	}
+	memcpy(a, version, len);
 }
 
 #pragma region 测试NewCanServer接口和event,包含single event和multiple event,需要手动调一下CallTimer()

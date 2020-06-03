@@ -77,6 +77,9 @@ namespace PInvokeFramework
         public static extern void UnsignedArray(int len, byte[] a);
 
         [DllImport("Win32ProjectDll.dll")]
+        public static extern void MemcpyArray(int len, byte[] a);
+
+        [DllImport("Win32ProjectDll.dll")]
         public static extern int SetFunctionPointer(FunctionPointerType1 pointer);
 
         [DllImport("Win32ProjectDll.dll")]
@@ -160,20 +163,42 @@ namespace PInvokeFramework
             //Console.ReadLine();
             //#endregion
 
-            #region 测试byte[]对应到C++的unsigned char
+            //#region 测试byte[]对应到C++的unsigned char
 
-            byte[] testbyteArray = new byte[3] { 17,0,145};
+            //byte[] testbyteArray = new byte[12];
 
-            string byteString = "";
-            foreach (var item in testbyteArray)
+            //string byteString = "";
+            //foreach (var item in testbyteArray)
+            //{
+            //    byteString += item;
+            //    byteString += " ";
+            //}
+            //Console.WriteLine("Before PINVOKE byteString : {0}", byteString);
+
+            ////it will print value in C codes
+            //UnsignedArray(testbyteArray.Length, testbyteArray);
+
+            //byteString = ByteArrayToStringConverter1(testbyteArray);
+            //Console.WriteLine("After PINVOKE byteString : {0}", byteString);
+
+            //Console.ReadLine();
+            //#endregion
+
+            #region 测试byte[]对应到C++的unsigned char, 拷贝越界的情况,会只传部分string
+            byte[] array1 = new byte[20];
+
+            string string1 = "";
+            foreach (var item in array1)
             {
-                byteString += item;
-                byteString += " ";
+                string1 += item;
+                string1 += " ";
             }
-            Console.WriteLine("Before PINVOKE byteString : {0}", byteString);
+            Console.WriteLine("Before PINVOKE byteString : {0}", array1);
 
-            //it will print value in C codes
-            UnsignedArray(testbyteArray.Length, testbyteArray);
+            MemcpyArray(array1.Length, array1);
+
+            string1 = ByteArrayToStringConverter1(array1);
+            Console.WriteLine("After PINVOKE byteString : {0}", string1);
 
             Console.ReadLine();
             #endregion
@@ -428,6 +453,28 @@ namespace PInvokeFramework
             TxdBuf = charToASCII.GetBytes(charBuf);    // 转换为各字符对应的ASCII
 
             return TxdBuf;
+        }
+
+        public static char[] ByteArrayToCharArrayConverter1(byte[] byteBuf)
+        {
+            int len = byteBuf.Length;
+
+            char[] ascii = new char[len];
+
+            for (int i = 0; i < len; i++)
+            {
+                char s1 = (char)byteBuf[i];
+                ascii[i] = s1;
+            }
+
+            return ascii;
+        }
+
+        public static string ByteArrayToStringConverter1(byte[] byteBuf)
+        {
+            char[] value = ByteArrayToCharArrayConverter1(byteBuf);
+
+            return new string(value);
         }
     }
 }
