@@ -25,6 +25,11 @@ namespace PInvokeFramework
         public double B;
     }
 
+    public struct ShortStruct
+    {
+        public IntPtr value;
+    }
+
     public enum CZCom_MessageType
     {
         CZCom_MessageType_CAN11 = 1,
@@ -93,6 +98,9 @@ namespace PInvokeFramework
 
         [DllImport("Win32ProjectDll.dll")]
         public static extern void SetSimpleStruct(SimpleStruct value);
+
+        [DllImport("Win32ProjectDll.dll")]
+        public static extern bool GetUSBDeviceProperties(int Number, ShortStruct pPoductId, MTB_DATA pName, MTB_DATA pSerialNumber);
 
         private static _IPortEvents_ReceivedCANMessageEventHandlerArray ReceivedCANMessage;
 
@@ -185,22 +193,30 @@ namespace PInvokeFramework
             //#endregion
 
             #region 测试byte[]对应到C++的unsigned char, 拷贝越界的情况,会只传部分string
-            byte[] array1 = new byte[20];
+            //byte[] array1 = new byte[20];
 
-            string string1 = "";
-            foreach (var item in array1)
-            {
-                string1 += item;
-                string1 += " ";
-            }
-            Console.WriteLine("Before PINVOKE byteString : {0}", array1);
+            //string string1 = "";
+            //foreach (var item in array1)
+            //{
+            //    string1 += item;
+            //    string1 += " ";
+            //}
+            //Console.WriteLine("Before PINVOKE byteString : {0}", array1);
 
-            MemcpyArray(array1.Length, array1);
+            //MemcpyArray(array1.Length, array1);
 
-            string1 = ByteArrayToStringConverter1(array1);
-            Console.WriteLine("After PINVOKE byteString : {0}", string1);
+            //string1 = ByteArrayToStringConverter1(array1);
+            //Console.WriteLine("After PINVOKE byteString : {0}", string1);
 
-            Console.ReadLine();
+            //Console.ReadLine();
+            #endregion
+
+            #region 测试多个out参数的情况
+            short pPoductId = 0;
+            string pName = "unknown";
+            string pSerialNumber = "unknown";
+            GetUSBDevicePropertiesByPInvoke(6, out pPoductId, out pName, out pSerialNumber);
+            Console.WriteLine("pPoductId: " + pPoductId + ";   pName:" + pName + ";   pSerialNumber:" + pSerialNumber);
             #endregion
 
             #region ptr to int
@@ -476,5 +492,78 @@ namespace PInvokeFramework
 
             return new string(value);
         }
+
+        public static int IntSize => Marshal.SizeOf(typeof(int));
+        public static int CharSize => Marshal.SizeOf(typeof(char));
+        public static int ShortSize => Marshal.SizeOf(typeof(short));
+
+        public static void InitializeMtbData(ref MTB_DATA list)
+        {
+            int charNumber = 100;
+            list.count = Marshal.AllocCoTaskMem(IntSize);
+            Marshal.StructureToPtr(charNumber, list.count, false);
+
+            list.buff = Marshal.AllocCoTaskMem(CharSize * charNumber);
+        }
+
+        public static void InitializeShortData(ref ShortStruct shortStruct)
+        {
+            //short number = -1;
+            shortStruct.value = Marshal.AllocCoTaskMem(ShortSize);
+            //Marshal.StructureToPtr(number, shortStruct.value, false);
+        }
+
+        public static byte[] MTBDataToArray(MTB_DATA list)
+        {
+            int size = Marshal.SizeOf(typeof(char));
+            int count = (int)Marshal.PtrToStructure(new IntPtr(list.count.ToInt64()), typeof(int));
+
+            if (count == -1)
+            {
+                return null;
+            }
+
+            byte[] byteArray = new byte[count];
+            for (int i = 0; i < count; i++)
+            {
+                byteArray[i] = (byte)Marshal.PtrToStructure(new IntPtr(list.buff.ToInt64() + i * size), typeof(byte));
+            }
+
+            Marshal.FreeCoTaskMem(list.buff);
+
+            return byteArray;
+        }
+
+        public static short MTBDataToArray(ShortStruct list)
+        {
+            int size = Marshal.SizeOf(typeof(short));
+            short resultValue = (short)Marshal.PtrToStructure(new IntPtr(list.value.ToInt64()), typeof(short));
+            Marshal.FreeCoTaskMem(list.value);
+
+            return resultValue;
+        }
+
+        public static bool GetUSBDevicePropertiesByPInvoke(int Number, out short pPoductId, out string pName, out string pSerialNumber)
+        {
+            ShortStruct poductId = new ShortStruct();
+            InitializeShortData(ref poductId);
+
+            MTB_DATA name = new MTB_DATA();
+            InitializeMtbData(ref name);
+
+            MTB_DATA serialNumber = new MTB_DATA();
+            InitializeMtbData(ref serialNumber);
+
+            bool result = GetUSBDeviceProperties(Number, poductId, name, serialNumber);
+
+            pPoductId = MTBDataToArray(poductId);
+            byte[] pPoductIdByte = MTBDataToArray(name);
+            pName = ByteArrayToStringConverter1(pPoductIdByte);
+            byte[] pSerialNumberByte = MTBDataToArray(serialNumber);
+            pSerialNumber = ByteArrayToStringConverter1(pSerialNumberByte);
+
+            return result;
+        }
+        
     }
 }

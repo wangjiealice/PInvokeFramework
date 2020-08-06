@@ -58,6 +58,44 @@ extern "C" __declspec(dllexport) int SetFunctionPointerString(FunctionPointerTyp
 }
 
 //使用 PInvoke 封送嵌入式指针
+struct MTB_DATA {
+	char* item;
+	int* count;
+};
+
+struct ShortStruct
+{
+	short* value;
+};
+
+extern "C"  __declspec(dllexport) bool GetUSBDeviceProperties(int Number, ShortStruct pPoductId, MTB_DATA pName, MTB_DATA pSerialNumber)
+{
+	printf_s("[unmanaged] input Number is = %d\n", Number);
+
+	*pPoductId.value = 6;
+	printf_s("[unmanaged] pPoductId = %d\n", *pPoductId.value);
+
+	*pName.count = 10;
+	printf_s("[unmanaged] count = %d\n", *pName.count);
+	for (int i = 0; i < *pName.count; i++)
+	{
+		pName.item[i] = 'a';
+		printf_s("array[%d] = %f\n", i, pName.item[i]);
+	}
+
+	*pSerialNumber.count = 20;
+	printf_s("[unmanaged] count = %d\n", *pSerialNumber.count);
+	for (int i = 0; i < *pSerialNumber.count; i++)
+	{
+		pSerialNumber.item[i] = 'b';
+		printf_s("array[%d] = %f\n", i, pSerialNumber.item[i]);
+	}
+
+	return true;
+}
+
+
+//使用 PInvoke 封送嵌入式指针
 struct ListStruct {
 	int count;
 	double* item;
