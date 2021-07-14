@@ -47,8 +47,8 @@ namespace PInvokeFramework
     public struct IOLMaster500Image
     {
         public IntPtr imageBuffer;
-        int width;
-        int height;
+        public int width;
+        public int height;
     };
 
     public delegate int FunctionPointerType1(int data);
@@ -620,6 +620,11 @@ namespace PInvokeFramework
             int imageWidth;
             int imageHeight;
             CreateImageBuffer(out rgbValues, out imageWidth, out imageHeight);
+
+            IOLMaster500Image image;
+            image.imageBuffer = rgbValues;
+            image.width= imageWidth;
+            image.height = imageHeight;
 
 
             TransferSingleImage(rgbValues, imageWidth, imageHeight);
