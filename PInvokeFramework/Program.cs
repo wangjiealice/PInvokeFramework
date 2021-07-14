@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
-
+using System.Drawing;
 
 namespace PInvokeFramework
 {
@@ -43,6 +43,13 @@ namespace PInvokeFramework
         CZCom_MessageType_MAC_REQ = 514,
         CZCom_MessageType_MAC_6000 = 1024
     }
+
+    public struct IOLMaster500Image
+    {
+        public IntPtr imageBuffer;
+        int width;
+        int height;
+    };
 
     public delegate int FunctionPointerType1(int data);
 
@@ -102,10 +109,21 @@ namespace PInvokeFramework
         [DllImport("Win32ProjectDll.dll")]
         public static extern bool GetUSBDeviceProperties(int Number, ShortStruct pPoductId, MTB_DATA pName, MTB_DATA pSerialNumber);
 
+        [DllImport("Win32ProjectDll.dll")]
+        private static extern bool TransferSingleImage(byte[] imageBuffer, int imageWidth, int imageHeight);
+
+        [DllImport("Win32ProjectDll.dll")]
+        private static extern bool TransferMultipleImages(IOLMaster500Image[] imageBuffer, int length);
+
         private static _IPortEvents_ReceivedCANMessageEventHandlerArray ReceivedCANMessage;
 
         static void Main(string[] args)
         {
+            //#region PInvoke image 2021/7/14
+
+            TransferImageTest();
+            //#endregion PInvoke image 2021/7/14
+
             //#region PInvoke simpleStruct  2019.2.18
             //Console.ReadLine();
             //SimpleStruct structValue;
@@ -564,6 +582,50 @@ namespace PInvokeFramework
 
             return result;
         }
-        
+        public static void CreateImageBuffer(out byte[] rgbValues, out int imageWidth, out int imageHeight)
+        {
+            Bitmap bmp = (Bitmap)Image.FromFile("KER.bmp");
+            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            System.Drawing.Imaging.BitmapData bmpData =
+            bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
+            // Get the address of the first line.
+            IntPtr ptr = bmpData.Scan0;
+
+            // Declare an array to hold the bytes of the bitmap. 
+            int bytes = Math.Abs(bmpData.Stride) * bmp.Height;
+            rgbValues = new byte[bytes];
+
+            // Copy the RGB values into the array.
+            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
+
+            // Unlock the bits.
+            bmp.UnlockBits(bmpData);
+            imageWidth = bmp.Width;
+            imageHeight = bmp.Height;
+        }
+
+        public static void TransferImageTest()
+        {
+            byte[] rgbValues;
+            int imageWidth;
+            int imageHeight;
+            CreateImageBuffer(out rgbValues, out imageWidth, out imageHeight);
+
+            TransferSingleImage(rgbValues, imageWidth, imageHeight);
+        }
+
+        public static void TransferMultipleImagesTest()
+        {
+            byte[] rgbValues;
+            int imageWidth;
+            int imageHeight;
+            CreateImageBuffer(out rgbValues, out imageWidth, out imageHeight);
+
+
+            TransferSingleImage(rgbValues, imageWidth, imageHeight);
+        }
+
+
+
     }
 }

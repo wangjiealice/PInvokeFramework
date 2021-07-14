@@ -68,6 +68,12 @@ struct ShortStruct
 	short* value;
 };
 
+struct IOLMaster500Image {
+	char* imageBuffer;
+	int width;
+	int height;
+};
+
 extern "C"  __declspec(dllexport) bool GetUSBDeviceProperties(int Number, ShortStruct pPoductId, MTB_DATA pName, MTB_DATA pSerialNumber)
 {
 	printf_s("[unmanaged] input Number is = %d\n", Number);
@@ -293,6 +299,25 @@ extern "C" __declspec(dllexport) void CallTimer()
 
 #pragma endregion
 
+#pragma ²âÊÔ´«µÝÍ¼Ïñ
+#include <QImage>
+#include <QPixmap>
+extern "C" __declspec(dllexport) void TransferSingleImage(unsigned char imageBuffer[], int imageWidth, int imageHeight)
+{
+	QImage image(imageBuffer, imageWidth, imageHeight, QImage::Format_Grayscale8);
+	image.save("newKER.bmp");
+}
+
+extern "C" __declspec(dllexport) void TransferMultipleImages(IOLMaster500Image imageBuffer[], int length)
+{
+	for (int i = 0; i < length; i++)
+	{
+		//QImage image(imageBuffer[i].imageBuffer, imageBuffer[i].width, imageBuffer[i].height, QImage::Format_Grayscale8);
+		//image.save("newKER.bmp");
+	}
+
+}
 
 
+#pragma endregion
 

@@ -53,14 +53,17 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;WIN32PROJECTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(QT32DIR)\include;$(QT32DIR)\include\QtCore;$(QT32DIR)\include\QtGui;$(QT32DIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(QT32DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>IF NOT EXIST $(SolutionDir)$(SolutionName)\bin\$(Configuration) mkdir $(SolutionDir)$(SolutionName)\$(Configuration) 
-xcopy "$(TargetPath)" "$(SolutionDir)$(SolutionName)\bin\$(Configuration)" /f /y</Command>
+xcopy "$(TargetPath)\..\*" "$(SolutionDir)$(SolutionName)\bin\$(Configuration)" /f /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
