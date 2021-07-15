@@ -119,24 +119,27 @@ namespace PInvokeFramework
 
         static void Main(string[] args)
         {
-            //#region PInvoke image 2021/7/14
+            #region transfer multiple images
+            TransferMultipleImagesTest();
+            #endregion
 
+            #region transfer one image
             TransferImageTest();
-            //#endregion PInvoke image 2021/7/14
+            #endregion
 
-            //#region PInvoke simpleStruct  2019.2.18
-            //Console.ReadLine();
-            //SimpleStruct structValue;
-            //structValue.intA = 1;
-            //structValue.B = 1234.5678 ;
-            //Console.WriteLine("[managed]Before SetSimpleStruct, A is" + structValue.intA +
-            //    "; B is " + structValue.B);
-            //SetSimpleStruct(structValue);
-            //Console.WriteLine("[managed]After SetSimpleStruct, A is" + structValue.intA +
-            //    "; B is " + structValue.B);
-            //Console.ReadLine();
+            #region PInvoke simpleStruct  2019.2.18
+            Console.ReadLine();
+            SimpleStruct structValue;
+            structValue.intA = 1;
+            structValue.B = 1234.5678;
+            Console.WriteLine("[managed]Before SetSimpleStruct, A is" + structValue.intA +
+                "; B is " + structValue.B);
+            SetSimpleStruct(structValue);
+            Console.WriteLine("[managed]After SetSimpleStruct, A is" + structValue.intA +
+                "; B is " + structValue.B);
+            Console.ReadLine();
 
-            //#endregion
+            #endregion
 
             //#region PInvoke string  2019.2.18
             //TakesAString("Framework called!");
@@ -211,22 +214,22 @@ namespace PInvokeFramework
             //#endregion
 
             #region 测试byte[]对应到C++的unsigned char, 拷贝越界的情况,会只传部分string
-            //byte[] array1 = new byte[20];
+            byte[] array1 = new byte[20];
 
-            //string string1 = "";
-            //foreach (var item in array1)
-            //{
-            //    string1 += item;
-            //    string1 += " ";
-            //}
-            //Console.WriteLine("Before PINVOKE byteString : {0}", array1);
+            string string1 = "";
+            foreach (var item in array1)
+            {
+                string1 += item;
+                string1 += " ";
+            }
+            Console.WriteLine("Before PINVOKE byteString : {0}", array1);
 
-            //MemcpyArray(array1.Length, array1);
+            MemcpyArray(array1.Length, array1);
 
-            //string1 = ByteArrayToStringConverter1(array1);
-            //Console.WriteLine("After PINVOKE byteString : {0}", string1);
+            string1 = ByteArrayToStringConverter1(array1);
+            Console.WriteLine("After PINVOKE byteString : {0}", string1);
 
-            //Console.ReadLine();
+            Console.ReadLine();
             #endregion
 
             #region 测试多个out参数的情况
@@ -403,9 +406,6 @@ namespace PInvokeFramework
                 anotherParray[i] = (byte)Marshal.PtrToStructure(new IntPtr(vData.ToInt32() + i * size), typeof(byte));
             }
 
-
-
-
             //Console.WriteLine(vData);
             //byte[] byteArray = (byte[])vData;
             //byte[] byteArrayResult = new byte[vDataLength];
@@ -438,6 +438,18 @@ namespace PInvokeFramework
     short SourceAddr, short CmdClass, short CmdNbr, short SubNr, short sPID, IntPtr vData, int vDataArray)
         {
             Console.WriteLine("OnCanServerChanged 2 called");
+        }
+
+        public static bool IsContinue()
+        {
+            Console.WriteLine("Press Y/y to continue, other keys to stop.");
+            ConsoleKeyInfo key = Console.ReadKey();
+            if(key.Key.Equals(ConsoleKey.Y))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public static int functionA(int data)
@@ -582,9 +594,10 @@ namespace PInvokeFramework
 
             return result;
         }
-        public static void CreateImageBuffer(out byte[] rgbValues, out int imageWidth, out int imageHeight)
+
+        public static void CreateImageBuffer(string imageName, out byte[] rgbValues, out int imageWidth, out int imageHeight)
         {
-            Bitmap bmp = (Bitmap)Image.FromFile("KER.bmp");
+            Bitmap bmp = (Bitmap)Image.FromFile(imageName);
             Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
             System.Drawing.Imaging.BitmapData bmpData =
             bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
@@ -609,7 +622,7 @@ namespace PInvokeFramework
             byte[] rgbValues;
             int imageWidth;
             int imageHeight;
-            CreateImageBuffer(out rgbValues, out imageWidth, out imageHeight);
+            CreateImageBuffer("TestImages/KER.bmp", out rgbValues, out imageWidth, out imageHeight);
 
             TransferSingleImage(rgbValues, imageWidth, imageHeight);
         }
@@ -619,15 +632,29 @@ namespace PInvokeFramework
             byte[] rgbValues;
             int imageWidth;
             int imageHeight;
-            CreateImageBuffer(out rgbValues, out imageWidth, out imageHeight);
+            int imageNumber = 12;
+            IOLMaster500Image[] imagesBuffer = new IOLMaster500Image[imageNumber];
 
-            IOLMaster500Image image;
-            image.imageBuffer = rgbValues;
-            image.width= imageWidth;
-            image.height = imageHeight;
+            for (int i = 0; i < imageNumber; i++)
+            {
+                string imageName = string.Format("TestImages/File{0:D2}.bmp", i);
+                CreateImageBuffer(imageName, out rgbValues, out imageWidth, out imageHeight);
+                IOLMaster500Image image = new IOLMaster500Image();
+                int size = Marshal.SizeOf(typeof(byte));
 
+                image.imageBuffer = Marshal.AllocCoTaskMem(size * rgbValues.Length);
 
-            TransferSingleImage(rgbValues, imageWidth, imageHeight);
+                for (int j = 0; j < rgbValues.Length; j++)
+                {
+                    IntPtr t = new IntPtr(image.imageBuffer.ToInt32() + j * size);
+                    Marshal.StructureToPtr(rgbValues[j], t, true);
+                }
+                image.width = imageWidth;
+                image.height = imageHeight;
+                imagesBuffer[i] = image;
+            }
+
+            TransferMultipleImages(imagesBuffer, imageNumber);
         }
 
 

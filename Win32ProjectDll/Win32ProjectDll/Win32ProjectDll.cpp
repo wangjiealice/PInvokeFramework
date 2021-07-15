@@ -69,7 +69,7 @@ struct ShortStruct
 };
 
 struct IOLMaster500Image {
-	char* imageBuffer;
+	unsigned char* imageBuffer;
 	int width;
 	int height;
 };
@@ -305,15 +305,15 @@ extern "C" __declspec(dllexport) void CallTimer()
 extern "C" __declspec(dllexport) void TransferSingleImage(unsigned char imageBuffer[], int imageWidth, int imageHeight)
 {
 	QImage image(imageBuffer, imageWidth, imageHeight, QImage::Format_Grayscale8);
-	image.save("newKER.bmp");
+	image.save("newKER1.bmp");
 }
 
 extern "C" __declspec(dllexport) void TransferMultipleImages(IOLMaster500Image imageBuffer[], int length)
 {
 	for (int i = 0; i < length; i++)
 	{
-		//QImage image(imageBuffer[i].imageBuffer, imageBuffer[i].width, imageBuffer[i].height, QImage::Format_Grayscale8);
-		//image.save("newKER.bmp");
+		QImage image((imageBuffer[i].imageBuffer), imageBuffer[i].width, imageBuffer[i].height, QImage::Format_Grayscale8);
+		image.save("KER_Multiple_Image" + QString::number(i) + ".bmp");
 	}
 
 }
