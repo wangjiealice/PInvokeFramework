@@ -51,6 +51,14 @@ namespace PInvokeFramework
         public int height;
     };
 
+    public struct ALMData
+    {
+        public IntPtr r1;//double
+        public IntPtr r2;//double
+        public IntPtr centerX;//int
+        public IntPtr centerY;//int
+    };
+
     public delegate int FunctionPointerType1(int data);
 
     public delegate int FunctionPointerType2(String data);
@@ -113,7 +121,7 @@ namespace PInvokeFramework
         private static extern bool TransferSingleImage(byte[] imageBuffer, int imageWidth, int imageHeight);
 
         [DllImport("Win32ProjectDll.dll")]
-        private static extern bool TransferMultipleImages(IOLMaster500Image[] imageBuffer, int length);
+        private static extern bool TransferMultipleImages(IOLMaster500Image[] imageBuffer, int imageNumber, ALMData data);
 
         private static _IPortEvents_ReceivedCANMessageEventHandlerArray ReceivedCANMessage;
 
@@ -526,6 +534,8 @@ namespace PInvokeFramework
         public static int IntSize => Marshal.SizeOf(typeof(int));
         public static int CharSize => Marshal.SizeOf(typeof(char));
         public static int ShortSize => Marshal.SizeOf(typeof(short));
+        public static int DoubleSize => Marshal.SizeOf(typeof(double));
+
 
         public static void InitializeMtbData(ref MTB_DATA list)
         {
@@ -637,13 +647,13 @@ namespace PInvokeFramework
 
             for (int i = 0; i < imageNumber; i++)
             {
+                //从本地加载文件;
                 string imageName = string.Format("TestImages/File{0:D2}.bmp", i);
                 CreateImageBuffer(imageName, out rgbValues, out imageWidth, out imageHeight);
+
                 IOLMaster500Image image = new IOLMaster500Image();
                 int size = Marshal.SizeOf(typeof(byte));
-
                 image.imageBuffer = Marshal.AllocCoTaskMem(size * rgbValues.Length);
-
                 for (int j = 0; j < rgbValues.Length; j++)
                 {
                     IntPtr t = new IntPtr(image.imageBuffer.ToInt32() + j * size);
@@ -654,10 +664,41 @@ namespace PInvokeFramework
                 imagesBuffer[i] = image;
             }
 
-            TransferMultipleImages(imagesBuffer, imageNumber);
+            // 构造输出参数，C#分配和释放空间；
+            double r1_input = 1;
+            double r2_input = 2;
+            int centerX_input = 3;
+            int centerY_input = 4;
+            ALMData data = new ALMData();
+            data.r1 = TypeToPtrConverter(r1_input);
+            data.r2 = TypeToPtrConverter(r2_input);
+            data.centerX = TypeToPtrConverter(centerX_input);
+            data.centerY = TypeToPtrConverter(centerY_input);
+
+            TransferMultipleImages(imagesBuffer, imageNumber, data);
+
+            double r1_output = PtrToTypeConverter<double>(data.r1);
+            double r2_output = PtrToTypeConverter<double>(data.r2);
+            int centerX_output = PtrToTypeConverter<int>(data.centerX);
+            int centerY_output = PtrToTypeConverter<int>(data.centerY);
         }
 
+        public static IntPtr TypeToPtrConverter<T>(T value)
+        {
+            int typeSize = Marshal.SizeOf(typeof(T));
+            IntPtr ptr = Marshal.AllocCoTaskMem(typeSize);
+            Marshal.StructureToPtr(value, ptr, false);
 
+            return ptr;
+        }
 
+        public static T PtrToTypeConverter<T>(IntPtr ptr)
+        {
+            int size = Marshal.SizeOf(typeof(T));
+            T resultValue = (T)Marshal.PtrToStructure(new IntPtr(ptr.ToInt64()), typeof(T));
+            Marshal.FreeCoTaskMem(ptr);
+
+            return resultValue;
+        }
     }
 }

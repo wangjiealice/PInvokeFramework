@@ -74,6 +74,13 @@ struct IOLMaster500Image {
 	int height;
 };
 
+struct ALMData {
+	double* r1;
+	double* r2;
+	int* centerX;
+	int* centerY;
+};
+
 extern "C"  __declspec(dllexport) bool GetUSBDeviceProperties(int Number, ShortStruct pPoductId, MTB_DATA pName, MTB_DATA pSerialNumber)
 {
 	printf_s("[unmanaged] input Number is = %d\n", Number);
@@ -308,14 +315,18 @@ extern "C" __declspec(dllexport) void TransferSingleImage(unsigned char imageBuf
 	image.save("newKER1.bmp");
 }
 
-extern "C" __declspec(dllexport) void TransferMultipleImages(IOLMaster500Image imageBuffer[], int length)
+extern "C" __declspec(dllexport) void TransferMultipleImages(IOLMaster500Image imageBuffer[], int imageNumber, ALMData data)
 {
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i < imageNumber; i++)
 	{
 		QImage image((imageBuffer[i].imageBuffer), imageBuffer[i].width, imageBuffer[i].height, QImage::Format_Grayscale8);
 		image.save("KER_Multiple_Image" + QString::number(i) + ".bmp");
 	}
 
+	*data.r1 = 6;
+	*data.r2 = 7;
+	*data.centerX = 8;
+	*data.centerY = 9;
 }
 
 
