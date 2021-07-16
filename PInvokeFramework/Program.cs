@@ -78,49 +78,49 @@ namespace PInvokeFramework
         public static extern int CalculateAdd(int a, int b);
 
         
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern int Divide(int x, int y);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern int Add(int a, int b);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern void TakesListStruct(MListStruct list);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern void TakesAnArray(int len, int[] a);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern void TakesAString(String word);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern void UnsignedArray(int len, byte[] a);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern void MemcpyArray(int len, byte[] a);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern int SetFunctionPointer(FunctionPointerType1 pointer);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern int SetFunctionPointerString(FunctionPointerType2 pointer);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern void setFire_ReceivedCANMessage_CB(_IPortEvents_ReceivedCANMessageEventHandler pointer);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern void setFire_ReceivedCANMessage_MulEvent(_IPortEvents_ReceivedCANMessageEventHandlerArray pointer);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern void SetSimpleStruct(SimpleStruct value);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         public static extern bool GetUSBDeviceProperties(int Number, ShortStruct pPoductId, MTB_DATA pName, MTB_DATA pSerialNumber);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         private static extern bool TransferSingleImage(byte[] imageBuffer, int imageWidth, int imageHeight);
 
-        [DllImport("Win32ProjectDll.dll")]
+        [DllImport("ProjectDll.dll")]
         private static extern bool TransferMultipleImages(IOLMaster500Image[] imageBuffer, int imageNumber, ALMData data);
 
         private static _IPortEvents_ReceivedCANMessageEventHandlerArray ReceivedCANMessage;
