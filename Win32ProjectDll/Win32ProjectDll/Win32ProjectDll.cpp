@@ -286,23 +286,23 @@ VOID   CALLBACK   TimerProcMulEvent(HWND   hwnd, UINT   uMsg, UINT   idEvent, DW
 }
 
 
-extern "C" __declspec(dllexport) void CallTimer()
-{
-	int   timer1 = 1;
-	MSG   msg;
-
-	SetTimer(NULL, timer1, 5000, TimerProcMulEvent);
-	int   itemp;
-	while ((itemp = GetMessage(&msg, NULL, NULL, NULL)) && (itemp != 0) && (-1 != itemp))
-	{
-		if (msg.message == WM_TIMER)
-		{
-			//std::cout   <<   "[C]i   got   the   message "   <<   std::endl;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
-}
+//extern "C" __declspec(dllexport) void CallTimer()
+//{
+//	int   timer1 = 1;
+//	MSG   msg;
+//
+//	SetTimer(NULL, timer1, 5000, TimerProcMulEvent);
+//	int   itemp;
+//	while ((itemp = GetMessage(&msg, NULL, NULL, NULL)) && (itemp != 0) && (-1 != itemp))
+//	{
+//		if (msg.message == WM_TIMER)
+//		{
+//			//std::cout   <<   "[C]i   got   the   message "   <<   std::endl;
+//			TranslateMessage(&msg);
+//			DispatchMessage(&msg);
+//		}
+//	}
+//}
 
 #pragma endregion
 
